@@ -19,6 +19,7 @@
 #ifndef GAZEBO_ROBOTIQ_HAND_PLUGIN_HH
 #define GAZEBO_ROBOTIQ_HAND_PLUGIN_HH
 
+
 #include <robotiq_s_model_articulated_msgs/SModelRobotInput.h>
 #include <robotiq_s_model_articulated_msgs/SModelRobotOutput.h>
 #include <gazebo_plugins/PubQueue.h>
@@ -169,22 +170,22 @@ class RobotiqHandPlugin : public gazebo::ModelPlugin
   /// \brief Number of joints in the hand.
   /// The three fingers can do abduction/adduction.
   /// Fingers 1 and 2 can do circumduction in one axis.
-  private: static const int NumJoints = 5;
+  private: static constexpr int NumJoints = 5;
 
   /// \brief Velocity tolerance. Below this value we assume that the joint is
   /// stopped (rad/s).
-  private: static const double VelTolerance = 0.002;
+  private: static constexpr double VelTolerance = 0.002;
 
   /// \brief Position tolerance. If the difference between target position and
   /// current position is within this value we'll conclude that the joint
   /// reached its target (rad).
-  private: static const double PoseTolerance = 0.002;
+  private: static constexpr double PoseTolerance = 0.002;
 
   /// \brief Min. joint speed (rad/s). Finger is 125mm and tip speed is 22mm/s.
-  private: static const double MinVelocity = 0.176;
+  private: static constexpr double MinVelocity = 0.176;
 
   /// \brief Max. joint speed (rad/s). Finger is 125mm and tip speed is 110mm/s.
-  private: static const double MaxVelocity = 0.88;
+  private: static constexpr double MaxVelocity = 0.88;
 
   /// \brief Default topic name for sending control updates to the left hand.
   private: static const std::string DefaultLeftTopicCommand;

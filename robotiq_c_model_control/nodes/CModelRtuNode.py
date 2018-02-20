@@ -62,7 +62,7 @@ def mainLoop(device):
     rospy.init_node('robotiqCModel')
 
     #The Gripper status is published on the topic named 'CModelRobotInput'
-    pub = rospy.Publisher('CModelRobotInput', inputMsg.CModel_robot_input)
+    pub = rospy.Publisher('CModelRobotInput', inputMsg.CModel_robot_input, queue_size=10)
 
     #The Gripper command is received from the topic named 'CModelRobotOutput'
     rospy.Subscriber('CModelRobotOutput', outputMsg.CModel_robot_output, gripper.refreshCommand)    
