@@ -57,7 +57,7 @@ class RobotiqHandPlugin : public gazebo::ModelPlugin
 {
 
 
-  
+
   friend class gazebo::common::PID;
   /// \brief Hand states.
   enum State
@@ -169,7 +169,7 @@ class RobotiqHandPlugin : public gazebo::ModelPlugin
   /// \brief Number of joints in the hand.
   /// The three fingers can do abduction/adduction.
   /// Fingers 1 and 2 can do circumduction in one axis.
-  private: static const int NumJoints = 5;
+  private: static constexpr int NumJoints = 5;
 
   /// \brief Velocity tolerance. Below this value we assume that the joint is
   /// stopped (rad/s).
