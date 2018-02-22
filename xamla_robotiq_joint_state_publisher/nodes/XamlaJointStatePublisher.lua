@@ -1,11 +1,13 @@
 #!/usr/bin/env th
 
 local ros = require 'ros'
+local xamlamoveit = require 'xamlamoveit'
 local Robotiq2Finger85JointStatePublisher = torch.class('Robotiq2Finger85JointStatePublisher')
 local default_values = {
-    closed_angle = 46.41,
+    closed_angle = 46.4,
     max_gap = 0.085,
-    ticks = 230,            -- number of ticks that the gripper publishes when it is assuming that it has reached its closed position which was determined during homing
+    min_gap = -0.017,
+    ticks = 255,
     timeout_in_s = 1
 }
 
@@ -21,7 +23,7 @@ function Robotiq2Finger85JointStatePublisher:__init(node_handle, joint_prefix, g
     self.node_handle = node_handle
     self.joint_prefix = joint_prefix
     self.gripper_topic = gripper_topic
-    self.correction_in_m = correction_in_m
+    self.correction_in_m = correction_in_m or default_values.min_gap
     self.seq = 0
 
     local ok, err = pcall(function() initializePubSub(self, gripper_topic) end)
@@ -31,12 +33,12 @@ function Robotiq2Finger85JointStatePublisher:__init(node_handle, joint_prefix, g
 end
 
 function Robotiq2Finger85JointStatePublisher:gripper_callback(msg, header)
-    local distance_per_tick = (default_values.max_gap - self.correction_in_m) / default_values.ticks
-    local position = default_values.max_gap - msg.gPO * distance_per_tick
+    local distance_per_tick = (default_values.max_gap - self.correction_in_m) / 255;
+    local position = (255 - msg.gPO) * distance_per_tick + self.correction_in_m
     self.current_angle = default_values.closed_angle - position * (default_values.closed_angle / default_values.max_gap)
     self.last_update_time = ros.Time.now()
 
-    print(msg.gPO, position, self.current_angle)
+    -- print(msg.gPO, position, self.current_angle)
 end
 
 function Robotiq2Finger85JointStatePublisher:publish()
@@ -83,8 +85,7 @@ local function main()
     cmd:option('-topic', '', 'gripper input topic')
     cmd:option('-correction', 0, 'gripper opening correction')
     cmd:option('-prefix', '', 'joint prefix')
-    cmd:option('-ros', '', 'additional ros params')
-    local opt = cmd:parse(arg)
+    local opt = xamlamoveit.xutils.parseRosParametersFromCommandLine(arg, cmd)
 
     if opt.topic == '' then
         print('No gripper topic was set. Terminating.')
@@ -98,9 +99,9 @@ local function main()
 
     ros.init('robotiq2finger85', ros.init_options.AnonymousName)
     local node_handle = ros.NodeHandle()
-    local joint_state_publisher = Robotiq2Finger85JointStatePublisher.new(node_handle, opt.prefix, opt.topic, opt.correction)
+    local joint_state_publisher = Robotiq2Finger85JointStatePublisher.new(node_handle, opt.prefix, opt.topic, opt.correction + default_values.min_gap)
 
-    local rate = ros.Rate(20)
+    local rate = ros.Rate(12)
     while ros.ok() do
         rate:sleep()
         ros.spinOnce()
