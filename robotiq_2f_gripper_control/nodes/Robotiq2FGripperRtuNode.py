@@ -50,7 +50,24 @@ import os, sys
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_input  as inputMsg
 from robotiq_2f_gripper_control.msg import _Robotiq2FGripper_robot_output as outputMsg
 
+def generateActivateCommand():
+    command = outputMsg.CModel_robot_output()
+    command.rACT = 1
+    command.rGTO = 1
+    command.rSP  = 255
+    command.rFR  = 150
+
+    return command
+
+def generateResetCommand():
+    command = outputMsg.CModel_robot_output()
+    command.rACT = 0
+
+    return command
+
 def mainLoop(device):
+    print("Robotiq 2-Finger 85 RTU node")
+    print("Device is set to " + device)
 
     #Gripper is a 2F with a TCP connection
     gripper = robotiq_2f_gripper_control.baseRobotiq2FGripper.robotiqbaseRobotiq2FGripper()
@@ -67,22 +84,38 @@ def mainLoop(device):
     #The Gripper command is received from the topic named 'Robotiq2FGripperRobotOutput'
     rospy.Subscriber('Robotiq2FGripperRobotOutput', outputMsg.Robotiq2FGripper_robot_output, gripper.refreshCommand)
 
-
+    STATE_INIT = 0
+    STATE_RESET = 1
+    STATE_ACTIVATE = 2
+    STATE_RUNNING = 3
+    state = STATE_INIT
     #We loop
     while not rospy.is_shutdown():
+        if state == STATE_INIT:
+            command = generateResetCommand()
+            gripper.refreshCommand(command)
+            state = STATE_RESET
+        elif state == STATE_RESET:
+            command = generateActivateCommand()
+            gripper.refreshCommand(command)
+            state = STATE_ACTIVATE
+        elif state == STATE_ACTIVATE:
+            #The Gripper command is received from the topic named 'CModelRobotOutput'
+            rospy.Subscriber('CModelRobotOutput', outputMsg.CModel_robot_output, gripper.refreshCommand)
+            state = STATE_RUNNING
 
-      #Get and publish the Gripper status
-      status = gripper.getStatus()
-      pub.publish(status)
+        #Get and publish the Gripper status
+        status = gripper.getStatus()
+        pub.publish(status)
 
-      #Wait a little
-      #rospy.sleep(0.05)
+        #Wait a little
+        #rospy.sleep(0.05)
 
-      #Send the most recent command
-      gripper.sendCommand()
+        #Send the most recent command
+        gripper.sendCommand()
 
-      #Wait a little
-      #rospy.sleep(0.05)
+        #Wait a little
+        #rospy.sleep(0.05)
 
 if __name__ == '__main__':
     try:
