@@ -12,7 +12,7 @@ local default_values = {
 }
 
 local function initializePubSub(self, gripper_topic)
-    local gripper_spec = ros.MsgSpec('robotiq_c_model_control/CModel_robot_input')
+    local gripper_spec = ros.MsgSpec('robotiq_2f_gripper_control/Robotiq2FGripper_robot_input')
     self.joint_state_spec = ros.MsgSpec('sensor_msgs/JointState')
     self.joint_state_publisher = self.node_handle:advertise('/joint_states', self.joint_state_spec, 1)
     self.gripper_subscriber = self.node_handle:subscribe(gripper_topic, gripper_spec, 1)

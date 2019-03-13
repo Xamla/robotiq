@@ -5,7 +5,7 @@ project(xamla_robotiq_joint_state_publisher)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  robotiq_c_model_control
+  robotiq_2f_gripper_control
 )
 
 
